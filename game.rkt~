@@ -237,79 +237,36 @@
 ;; Places ----------------------------------------
 ;; Each place handles a set of non-transitive verbs.
 
-(define entrada
+(define meadow
   (place
-   "Bem-vindo ao Parque de Diversão Caverna de Platão. Pegue o seu ticket de entrada, que dará acesso aos nossos brinquedos."
-   (list ticket)
-   (list
-    (cons north 
-          (lambda () praça)))))
-(record-element! 'entrada entrada)
-
-(define praça
-  (place
-   "Você está numa praçinha. Existe uma fonte no centro. Há uma grande movimentação de pessoas."
+   "You're standing in a meadow. There is a house to the north."
    (list)
    (list
-    (cons north (lambda () montanha-russa))
-    (cons east (lambda () mansao))
-    (cons south (lambda () entrada))
-    (cons west (lambda () lago)))))
-(record-element! 'praça praça)
+    (cons north 
+          (lambda () house-front))
+    (cons south 
+          (lambda () desert)))))
+(record-element! 'meadow meadow)
 
-(define montanha-russa
-  (place "Você chegou na Montanha Russa, a atração do parque"
-  (list)
-  (list
-   (cons south (lambda () praça)))))
-(record-element! 'montanha-russa montanha-russa)
-
-
-(define carrossel
-  (place "Você chegou na Carrossel, a atração do parque"
-  (list)
-  (list
-   (cons east (lambda () lago)))))
-(record-element! 'carrossel carrossel)
-
-(define lago
-  (place "Você se depara com um pequeno lago."
-  (list)
-  (list
-   (cons north (lambda () roda-gigante))
-   (cons east (lambda () praça))
-   (cons south (lambda () barracas))
-   (cons west (lambda () carrossel)))))
-(record-element! 'lago lago)
-
-(define roda-gigante
-  (place "Você está de frente com a Roda Gigante"
-  (list)
-  (list
-   (cons south (lambda () lago)))))
-(record-element! 'roda-gigante roda-gigante)
-
-(define mansao
-  (place "Você chegou na Mansão do Terror, a atração do parque"
-  (list)
-  (list
-   (cons west (lambda () praça)))))
-(record-element! 'mansao mansao)
-
-(define barracas
-  (place "Seguindo o aroma, você chegou nas barraquinhas de comida."
-  (list)
-  (list
-   (cons north (lambda () lago)))))
-(record-element! 'barracas barracas)
-   
+(define house-front
+  (place
+   "You are standing in front of a house."
+   (list door)
+   (list
+    (cons in 
+          (lambda ()
+            (if (eq? (thing-state door) 'open)
+                room
+                "The door is not open.")))
+    (cons south (lambda () meadow)))))
+(record-element! 'house-front house-front)
 
 (define desert
   (place
    "You're in a desert. There is nothing for miles around."
-   (list venda)
+   (list cactus key)
    (list
-    (cons north (lambda () entrada))
+    (cons north (lambda () meadow))
     (cons south (lambda () desert))
     (cons east (lambda () desert))
     (cons west (lambda () desert)))))
@@ -318,8 +275,8 @@
 (define room
   (place
    "You're in the house."
-   (list lanterna)
-   (list (cons out (lambda () praça)))))
+   (list trophy)
+   (list (cons out (lambda () house-front)))))
 (record-element! 'room room)
 
 ;; ============================================================
@@ -329,7 +286,7 @@
 (define stuff null) ; list of things
 
 ;; Current location:
-(define current-place entrada) ; place
+(define current-place meadow) ; place
 
 ;; Fuctions to be used by verb responses:
 (define (have-thing? t)
