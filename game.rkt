@@ -36,37 +36,37 @@
 ;; a printed form, and a boolean indincating whether it
 ;; is transitive.
 
-(define north (verb (list 'north 'n 'norte) "vai ao norte" #f))
+(define north (verb (list 'north 'n 'norte) "ir ao norte" #f))
 (record-element! 'north north)
 
-(define south (verb (list 'south 's 'norte) "vai ao sul" #f))
+(define south (verb (list 'south 's 'sul) "ir ao sul" #f))
 (record-element! 'south south)
 
-(define east (verb (list 'east 'e 'leste) "vai ao leste" #f))
+(define east (verb (list 'east 'e 'leste) "ir ao leste" #f))
 (record-element! 'east east)
 
-(define west (verb (list 'west 'w 'oeste) "vai ao oeste" #f))
+(define west (verb (list 'west 'w 'oeste) "ir ao oeste" #f))
 (record-element! 'west west)
 
-(define up (verb (list 'up 'cima) "vai para cima" #f))
+(define up (verb (list 'up 'cima) "ir para cima" #f))
 (record-element! 'up up)
 
-(define down (verb (list 'down 'abaixo) "vai para baixo" #f))
+(define down (verb (list 'down 'abaixo) "ir para baixo" #f))
 (record-element! 'down down)
 
-(define in (verb (list 'in 'enter 'entrar) "entra" #f))
+(define in (verb (list 'in 'enter 'entrar) "entrar" #f))
 (record-element! 'in in)
 
-(define out (verb (list 'out 'leave 'sair) "sai" #f))
+(define out (verb (list 'out 'leave 'sair) "sair" #f))
 (record-element! 'out out)
 
-(define get (verb (list 'get 'grab 'take 'pegar) "pega" #t))
+(define get (verb (list 'get 'grab 'take 'pegar) "pegar" #t))
 (record-element! 'get get)
 
-(define put (verb (list 'put 'drop 'leave 'largar 'soltar) "solta" #t))
+(define put (verb (list 'put 'drop 'leave 'largar 'soltar) "soltar" #t))
 (record-element! 'put put)
 
-(define open (verb (list 'open 'unlock 'abrir) "abre" #t))
+(define open (verb (list 'open 'unlock 'abrir) "abrir" #t))
 (record-element! 'open open)
 
 (define close (verb (list 'close 'lock 'fechar) "fechar" #t))
@@ -78,10 +78,10 @@
 (define quit (verb (list 'quit 'exit 'sair 'desistir) "desistir" #f))
 (record-element! 'quit quit) 
 
-(define look (verb (list 'look 'show 'olhar) "olha" #f))
+(define look (verb (list 'look 'show 'olhar) "olhar" #f))
 (record-element! 'look look)
 
-(define inventory (verb (list 'inventory 'mochila) "mostra objetos da mochila" #f))
+(define inventory (verb (list 'inventory 'mochila) "mostrar objetos da mochila" #f))
 (record-element! 'inventory inventory)
 
 (define help (verb (list 'help 'ajuda) (symbol->string 'help) #f))
@@ -94,8 +94,8 @@
 (record-element! 'load load)
 
 
-(define usar (verb (list 'usar 'utilizar 'aplicar) "usa artefato" #t))
-(define acender (verb (list 'acender 'acionar 'ligar) "acende" #t))
+(define usar (verb (list 'usar 'utilizar 'aplicar) "usar artefato" #t))
+(define acender (verb (list 'acender 'acionar 'ligar) "acender" #t))
 
 
 #|
@@ -117,7 +117,7 @@
 
 (define everywhere-actions
   (list
-   (cons quit (lambda () (begin (printf "Bye!\n") (exit))))
+   (cons quit (lambda () (begin (printf "Espero que tenha se divertido. Tchau! ;)\n") (exit))))
    (cons look (lambda () (show-current-place)))
    (cons inventory (lambda () (show-inventory)))
    (cons save (lambda () (save-game)))
@@ -159,7 +159,7 @@
                       "Voce ja esta com a lanterna."
                       (begin
                         (take-thing! lanterna)
-                        "Voce pegou a lanterna."))))
+                        "Voce pegou a lanterna. Ela agora está em sua mochila."))))
           (cons put 
                 (lambda ()
                   (if (have-thing? lanterna)
@@ -190,7 +190,7 @@
                       "Voce ja esta com o binoculos."
                       (begin
                         (take-thing! binoculos)
-                        "Voce pegou o binoculos."))))
+                        "Voce pegou o binoculos. Ele agora está em sua mochila."))))
           (cons put 
                 (lambda ()
                   (if (have-thing? binoculos)
@@ -217,7 +217,7 @@
                       "Voce ja pegou a venda."
                       (begin
                         (take-thing! venda)
-                        "Voce pegou a venda."))))
+                        "Voce pegou a venda. Ela agora está em sua mochila."))))
           (cons put 
                 (lambda ()
                   (if (have-thing? venda)
@@ -239,34 +239,34 @@
 
 (define entrada
   (place
-   "Bem-vindo ao Parque de Diversão Caverna de Platão. Pegue o seu ticket de entrada, que dará acesso aos nossos brinquedos."
+   "Bem-vindo ao Parque de Diversões Caverna de Platão. Pegue o seu ticket de entrada, que dará acesso aos nossos brinquedos."
    (list ticket)
    (list
     (cons north 
-          (lambda () praça)))))
+          (lambda () praca)))))
 (record-element! 'entrada entrada)
 
-(define praça
+(define praca
   (place
-   "Você está numa praçinha. Existe uma fonte no centro. Há uma grande movimentação de pessoas."
+   "Você está numa pracinha. Existe uma fonte no centro. Há uma grande movimentação de pessoas."
    (list)
    (list
     (cons north (lambda () montanha-russa))
     (cons east (lambda () mansao))
     (cons south (lambda () entrada))
     (cons west (lambda () lago)))))
-(record-element! 'praça praça)
+(record-element! 'praca praca)
 
 (define montanha-russa
   (place "Você chegou na Montanha Russa, a atração do parque"
   (list)
   (list
-   (cons south (lambda () praça)))))
+   (cons south (lambda () praca)))))
 (record-element! 'montanha-russa montanha-russa)
 
 
 (define carrossel
-  (place "Você chegou na Carrossel, a atração do parque"
+  (place "Você chegou ao Carrossel. Ele é muito bonito, com muitas luzes coloridas."
   (list)
   (list
    (cons east (lambda () lago)))))
@@ -277,23 +277,24 @@
   (list)
   (list
    (cons north (lambda () roda-gigante))
-   (cons east (lambda () praça))
+   (cons east (lambda () praca))
    (cons south (lambda () barracas))
    (cons west (lambda () carrossel)))))
 (record-element! 'lago lago)
 
 (define roda-gigante
-  (place "Você está de frente com a Roda Gigante"
+  (place "Você está em frente à Roda Gigante e... UAU! Ela é realmente GIGANTE. Com certeza te dará uma boa visão do parque."
   (list)
   (list
    (cons south (lambda () lago)))))
 (record-element! 'roda-gigante roda-gigante)
 
 (define mansao
-  (place "Você chegou na Mansão do Terror, a atração do parque"
+  (place "Você chegou na Mansão do Terror. Diz a lenda que criaturas sobrenaturais que já estavam aqui antes da fundação
+do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder."
   (list)
   (list
-   (cons west (lambda () praça)))))
+   (cons west (lambda () praca)))))
 (record-element! 'mansao mansao)
 
 (define barracas
@@ -306,7 +307,7 @@
 
 (define desert
   (place
-   "You're in a desert. There is nothing for miles around."
+   "Você está em meio a um deserto. Não há nada nem ninguém por perto."
    (list venda)
    (list
     (cons north (lambda () entrada))
@@ -317,9 +318,9 @@
 
 (define room
   (place
-   "You're in the house."
+   "Você está em um cômodo."
    (list lanterna)
-   (list (cons out (lambda () praça)))))
+   (list (cons out (lambda () praca)))))
 (record-element! 'room room)
 
 ;; ============================================================
@@ -363,7 +364,7 @@
 (define (show-current-place)
   (printf "~a\n" (place-desc current-place)) ; imprime o lugar
   (for-each (lambda (thing)      ; imprime as coisas do lugar
-              (printf "There is a ~a here.\n" (thing-name thing)))
+              (printf "Tem um(a) ~a aqui.\n" (thing-name thing)))
             (place-things current-place)))
 
 ;; Main loop
@@ -396,7 +397,7 @@
                   (do-verb)]    ; volte a processar outro comando, loop
                  [else (do-verb)])))) ; caso contrário, outro comando, loop
           (begin ; comando incorreto
-            (printf "I don't undertand what you mean.\n")
+            (printf "Desculpe, não entendi.\n")
             (do-verb)))))
 
 
@@ -416,10 +417,10 @@
     (lambda (verb)
       (lambda () ; função retornada por using-verb, mensagem de erro em contexto
         (if (verb-transitive? verb)
-            (format "~a what?" (string-titlecase (verb-desc verb)))
-            (format "Can't ~a here." (verb-desc verb))))))
+            (format "~a o quê?" (string-titlecase (verb-desc verb)))
+            (format "Impossível ~a aqui." (verb-desc verb))))))
    (lambda () ; não achou o verbo no jogo
-     (format "I don't know how to ~a." cmd))))
+     (format "Desculpe, eu não sei como ~a." cmd))))
 
 ;; Handle a transitive-verb command:
 (define (handle-transitive-verb cmd obj)
@@ -438,22 +439,22 @@
             => (lambda (thing) ; se existe, aplica esta função sobre a coisa/thing
                  (or (find-verb cmd (thing-actions thing)) ; retorna acão que se aplica a coisa
                      (lambda () ; se ação não encontrada, indica que não há ação
-                       (format "Don't know how to ~a ~a."
+                       (format "Não sei como ~a ~a."
                                (verb-desc verb) obj))))]
            [else ; se objeto não existe
             (lambda ()
-              (format "There's no ~a here to ~a." obj 
+              (format "Não há nenhum(a) ~a aqui para ~a." obj 
                       (verb-desc verb)))]))))
       (lambda ()  ; se não achou o verbo
         (format "I don't know how to ~a ~a." cmd obj))))
 
 ;; Show what the player is carrying:
 (define (show-inventory)
-  (printf "You have")
+  (printf "Na sua mochila você")
   (if (null? stuff)
-      (printf " no items.")
+      (printf " não tem nada.")
       (for-each (lambda (thing) ; aplica esta função a cada coisa da lista
-                  (printf "\n  a ~a" (thing-name thing)))
+                  (printf "\n  -> tem um(a) ~a" (thing-name thing)))
                 stuff))
   (printf "\n"))
 
@@ -475,10 +476,10 @@
 
 ;; Print help information:
 (define (show-help)
-  (printf "Use `look' to look around.\n")
-  (printf "Use `inventory' to see what you have.\n")
-  (printf "Use `save' or `load' to save or restore your game.\n")
-  (printf "There are some other verbs, and you can name a thing after some verbs.\n"))
+  (printf "Use 'olhar' para olhar o que há em volta.\n")
+  (printf "Use 'mochila' para ver os objetos que você está levando consigo.\n")
+  (printf "Use 'salvar' ou 'carregar' para salvar ou restaurar um jogo\n")
+  (printf "Existe alguns outros verbos, e você pode nomear uma coisa a partir de um verbo.\n"))
 
 ;; ============================================================
 ;; Save and load
