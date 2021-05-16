@@ -9,7 +9,7 @@
               transitive?)) ; boolean
 
 (struct thing (name         ; symbol
-               [state #:mutable] ; any value
+               [state #:mutable] ; any value  ----> ESTADO DE USO: EM USO OU NÃO
                actions))    ; list of verb--thing pairs
 
 (struct place (desc         ; string
@@ -36,62 +36,67 @@
 ;; a printed form, and a boolean indincating whether it
 ;; is transitive.
 
-(define north (verb (list 'north 'n) "go north" #f))
+(define north (verb (list 'north 'n 'norte) "vai ao norte" #f))
 (record-element! 'north north)
 
-(define south (verb (list 'south 's) "go south" #f))
+(define south (verb (list 'south 's 'norte) "vai ao sul" #f))
 (record-element! 'south south)
 
-(define east (verb (list 'east 'e) "go east" #f))
+(define east (verb (list 'east 'e 'leste) "vai ao leste" #f))
 (record-element! 'east east)
 
-(define west (verb (list 'west 'w) "go west" #f))
+(define west (verb (list 'west 'w 'oeste) "vai ao oeste" #f))
 (record-element! 'west west)
 
-(define up (verb (list 'up) "go up" #f))
+(define up (verb (list 'up 'cima) "vai para cima" #f))
 (record-element! 'up up)
 
-(define down (verb (list 'down) "go down" #f))
+(define down (verb (list 'down 'abaixo) "vai para baixo" #f))
 (record-element! 'down down)
 
-(define in (verb (list 'in 'enter) "enter" #f))
+(define in (verb (list 'in 'enter 'entrar) "entra" #f))
 (record-element! 'in in)
 
-(define out (verb (list 'out 'leave) "leave" #f))
+(define out (verb (list 'out 'leave 'sair) "sai" #f))
 (record-element! 'out out)
 
-(define get (verb (list 'get 'grab 'take) "take" #t))
+(define get (verb (list 'get 'grab 'take 'pegar) "pega" #t))
 (record-element! 'get get)
 
-(define put (verb (list 'put 'drop 'leave) "drop" #t))
+(define put (verb (list 'put 'drop 'leave 'largar 'soltar) "solta" #t))
 (record-element! 'put put)
 
-(define open (verb (list 'open 'unlock) "open" #t))
+(define open (verb (list 'open 'unlock 'abrir) "abre" #t))
 (record-element! 'open open)
 
-(define close (verb (list 'close 'lock) "close" #t))
+(define close (verb (list 'close 'lock 'fechar) "fechar" #t))
 (record-element! 'close close)
 
-(define knock (verb (list 'knock) (symbol->string 'knock) #t))
+(define knock (verb (list 'knock 'bater) (symbol->string 'knock) #t))
 (record-element! 'knock knock)
 
-(define quit (verb (list 'quit 'exit) "quit" #f))
-(record-element! 'quit quit)
+(define quit (verb (list 'quit 'exit 'sair 'desistir) "desistir" #f))
+(record-element! 'quit quit) 
 
-(define look (verb (list 'look 'show) "look" #f))
+(define look (verb (list 'look 'show 'olhar) "olha" #f))
 (record-element! 'look look)
 
-(define inventory (verb (list 'inventory) "check inventory" #f))
+(define inventory (verb (list 'inventory 'mochila) "mostra objetos da mochila" #f))
 (record-element! 'inventory inventory)
 
-(define help (verb (list 'help) (symbol->string 'help) #f))
+(define help (verb (list 'help 'ajuda) (symbol->string 'help) #f))
 (record-element! 'help help)
 
-(define save (verb (list 'save) (symbol->string 'save) #f))
+(define save (verb (list 'save 'salvar) (symbol->string 'save) #f))
 (record-element! 'save save)
 
-(define load (verb (list 'load) (symbol->string 'load) #f))
+(define load (verb (list 'load 'carregar) (symbol->string 'load) #f))
 (record-element! 'load load)
+
+
+(define usar (verb (list 'usar 'utilizar 'aplicar) "usa artefato" #t))
+(define acender (verb (list 'acender 'acionar 'ligar) "acende" #t))
+
 
 #|
 ;; Removed by Manoel Mendonca
@@ -123,63 +128,111 @@
 ;; Each thing handles a set of transitive verbs.
 
 
-(define cactus
-  (thing 'cactus 
-         #f 
-         (list (cons get (lambda () "Ouch!")))))
-(record-element! 'cactus cactus)
-
-(define door
-  (thing 'door
-         #f
-         (list
-          (cons open 
-                (lambda ()
-                  (if (have-thing? key)
-                      (begin
-                        (set-thing-state! door 'open)
-                        "The door is now unlocked and open.")
-                      "The door is locked.")))
-          (cons close 
-                (lambda ()
-                  (begin
-                    (set-thing-state! door #f)
-                    "The door is now closed.")))
-          (cons knock 
-                (lambda ()
-                  "No one is home.")))))
-(record-element! 'door door)
-
-(define key
-  (thing 'key
+(define ticket
+  (thing 'ticket
          #f
          (list
           (cons get 
                 (lambda ()
-                  (if (have-thing? key)
-                      "You already have the key."
+                  (if (have-thing? ticket)
+                      "Voce ja esta com o ticket."
                       (begin
-                        (take-thing! key)
-                        "You now have the key."))))
+                        (take-thing! ticket)
+                        "Voce pegou o ticket."))))
           (cons put 
                 (lambda ()
-                  (if (have-thing? key)
+                  (if (have-thing? ticket)
                       (begin
-                        (drop-thing! key)
-                        "You have dropped the key.")
-                      "You don't have the key."))))))
-(record-element! 'key key)
+                        (drop-thing! ticket)
+                        "Voce soltou o ticket.")
+                      "Voce nao esta com o ticket."))))))
+(record-element! 'ticket ticket)
 
-(define trophy
-  (thing 'trophy
+
+(define lanterna
+  (thing 'lanterna
+         #f 
+         (list
+          (cons get 
+                (lambda ()
+                  (if (have-thing? lanterna)
+                      "Voce ja esta com a lanterna."
+                      (begin
+                        (take-thing! lanterna)
+                        "Voce pegou a lanterna."))))
+          (cons put 
+                (lambda ()
+                  (if (have-thing? lanterna)
+                      (begin
+                        (drop-thing! lanterna)
+                        "Voce soltou a lanterna.")
+                      "Voce nao esta com a lanterna.")))
+          (cons usar
+                (lambda ()
+                  (if (have-thing? lanterna)
+                      (use-thing lanterna)
+                      "Voce nao esta com a lanterna")))
+          (cons acender
+                (lambda ()
+                  (if (have-thing? lanterna)
+                      (use-thing lanterna)
+                      "Voce nao esta com a lanterna")))
+          )))
+(record-element! 'lanterna lanterna)
+
+(define binoculos
+  (thing 'binoculos
          #f
          (list
           (cons get 
                 (lambda ()
-                  (begin
-                    (take-thing! trophy)
-                    "You win!"))))))
-(record-element! 'trophy trophy)
+                  (if (have-thing? binoculos)
+                      "Voce ja esta com o binoculos."
+                      (begin
+                        (take-thing! binoculos)
+                        "Voce pegou o binoculos."))))
+          (cons put 
+                (lambda ()
+                  (if (have-thing? binoculos)
+                      (begin
+                        (drop-thing! binoculos)
+                        "Voce soltou o binoculos.")
+                      "Voce nao esta com o binoculos.")))
+          (cons usar
+                (lambda ()
+                  (if (have-thing? binoculos)
+                      (use-thing binoculos)
+                      "Voce nao esta com o binoculos")))
+          )))
+(record-element! 'binoculos binoculos)
+
+
+(define venda
+  (thing 'venda
+         #f
+         (list
+          (cons get 
+                (lambda ()
+                  (if (have-thing? venda)
+                      "Voce ja pegou a venda."
+                      (begin
+                        (take-thing! venda)
+                        "Voce pegou a venda."))))
+          (cons put 
+                (lambda ()
+                  (if (have-thing? venda)
+                      (begin
+                        (drop-thing! venda)
+                        "Voce soltou a venda.")
+                      "Voce nao esta com a venda.")))
+          (cons usar
+                (lambda ()
+                  (if (have-thing? venda)
+                      (use-thing venda)
+                      "Voce nao esta com a venda")))
+          )))
+(record-element! 'venda venda)
+
 
 ;; Places ----------------------------------------
 ;; Each place handles a set of non-transitive verbs.
@@ -249,6 +302,10 @@
                      (cons t (place-things current-place)))
   (set! stuff (remq t stuff)))
 
+(define (use-thing t)
+  (if
+   (eq? (thing-state t) #t) (set-thing-state! t #f)
+   (set-thing-state! t #t)))
 
 ;; ============================================================
 ;; Game execution
