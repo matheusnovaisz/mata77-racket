@@ -303,25 +303,6 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (list
    (cons north (lambda () lago)))))
 (record-element! 'barracas barracas)
-   
-
-(define desert
-  (place
-   "Você está em meio a um deserto. Não há nada nem ninguém por perto."
-   (list venda)
-   (list
-    (cons north (lambda () entrada))
-    (cons south (lambda () desert))
-    (cons east (lambda () desert))
-    (cons west (lambda () desert)))))
-(record-element! 'desert desert)
-
-(define room
-  (place
-   "Você está em um cômodo."
-   (list lanterna)
-   (list (cons out (lambda () praca)))))
-(record-element! 'room room)
 
 ;; ============================================================
 ;; Game state
