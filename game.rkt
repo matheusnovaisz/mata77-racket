@@ -144,13 +144,16 @@
 (define pontos (verb (list 'pontos 'pontuacao) "ver pontos" #f))
 (record-element! 'pontos pontos)
 
+(define talk (verb (list 'talk 'falar 'conversar 'interagir) "falar" #t))
+(record-element! 'talk talk)
+
 
 #|
 ;; Removed by Manoel Mendonca
 (define all-verbs
   (list north south east west up down in out
         get put open close knock quit
-        look inventory help save load buy))
+        look inventory help save load buy eat talk))
 |#
 
 
@@ -299,6 +302,32 @@
           )))
 (record-element! 'comida comida)
 
+(define pessoa
+  (thing 'pessoa
+    #f
+    (list
+      (cons talk
+        (lambda ()
+          (if (and 
+                ;;; (have-thing? binoculos) 
+                (thing-state pessoa)
+                )
+            "Olá de novo, amigo. Espero que esteja se divertindo."
+              (begin 
+                (take-thing! binoculos) 
+                (set-thing-state! pessoa #t) 
+                (printf "Olá, amigo. Esse parque proporciona uma visão sensacional. É tão boa que quero que todos saibam como é bonito.\n")
+                "Então por favor, aceite esse binóculos como presente para você aproveitar ao máximo.")))))))
+
+(define caixa-de-ferramenta
+  (thing 'caixa-de-ferramenta
+    #f
+    (cons open
+      (lambda ()
+        (if (have-thing? lanterna)
+          "Não há nada aqui."
+          (begin (take-thing! lanterna) "Você encontrou uma lanterna!"))))))
+
 ;; States ----------------------------------------
 ;; Each state changes how the player will react.
 
@@ -332,7 +361,7 @@
 (define praca
   (place
    "Você está numa pracinha. Existe uma fonte no centro. Há uma grande movimentação de pessoas."
-   (list)
+   (list pessoa)
    (list
     (cons north (lambda () montanha-russa))
     (cons east (lambda () mansao))
@@ -357,10 +386,6 @@
    )))
 (record-element! 'montanha-russa montanha-russa)
 
-
-
-      
-
 (define carrossel
   (place "Você chegou ao Carrossel. Ele é muito bonito, com muitas luzes coloridas."
   (list)
@@ -376,14 +401,22 @@
 (record-element! 'carrossel carrossel)
 
 (define lago
-  (place "Você se depara com um pequeno lago."
-  (list binoculos)
+  (place "Você se depara com um pequeno lago. Na sua beirada, há um barco."
+  (list)
   (list
+   (cons in (lambda () barco))
    (cons north (lambda () roda-gigante))
    (cons east (lambda () praca))
    (cons south (lambda () barracas))
    (cons west (lambda () carrossel)))))
 (record-element! 'lago lago)
+
+(define barco
+  (place "Você está dentro de um barquinho"
+  (list caixa-de-ferramenta)
+  (list
+    (cons out (lambda () lago)))))
+(record-element! 'barco barco)
 
 (define roda-gigante
   (place "Você está em frente à Roda Gigante e... UAU! Ela é realmente GIGANTE. Com certeza te dará uma boa visão do parque."
@@ -404,7 +437,6 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (list)
   (list
    (cons in (lambda ()
-              
               (set-player-state! amedrontado)
               (if (and (have-thing? ticket) (have-thing? lanterna))
       "Você está com uma lanterna na sua mochila. Se você estiver com sorte ela pode estar com bateria e você poderia usá-la."
