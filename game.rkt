@@ -255,10 +255,10 @@
                   (begin
                   (if (have-thing? binoculos)
                       (use-thing binoculos "Que incrível! Está tudo tão perto agora, consigo ver todos os detalhes... ")
-                      "Voce nao esta com o binoculos"))
-                  (if (and (thing-state binoculos) (eq? current-place roda-gigante))
-                      (pontuar pontos-bonus)
-                      (pontuar 0))
+                      "Voce nao esta com o binoculos")
+                  (if (and (have-thing? binoculos) (ride-state esta-no-brinquedo?))
+                           (pontuar pontos-bonus)
+                           (pontuar 0)))
                   ))
           )))
 (record-element! 'binoculos binoculos)
@@ -286,7 +286,8 @@
                 (lambda ()
                   (if (have-thing? venda)
                       (use-thing venda)
-                      "Voce nao esta com a venda")))
+                      "Voce nao esta com a venda")
+                  ))
           )))
 (record-element! 'venda venda)
 
@@ -340,6 +341,7 @@
 ;; Each place handles a set of non-transitive verbs.
 
 (define brincou? (ride #f))
+(define esta-no-brinquedo? (ride #f))
 
 (define (brincar [msg ""])
       (set-ride-state! brincou? #t)
@@ -348,6 +350,12 @@
           (pontuar 0))
   (set-ride-state! brincou? #f)
   (printf "~a\n" msg))
+
+(define (entrar-brinquedo)
+  (set-ride-state! esta-no-brinquedo? #t))
+
+(define (sair-brinquedo)
+  (set-ride-state! esta-no-brinquedo? #f))
 
 (define entrada
   (place
@@ -423,11 +431,14 @@
   (list)
   (list
    (cons in (lambda () 
-    (if (and (have-thing? ticket) (have-thing? binoculos))
-      "Você se lembra que tem um binóculos na sua mochila? Usando o binóculos você contempla totalmente a vista do parque, se estendendo pelo vale onde ele se encontra. "
       (if (have-thing? ticket)
-       (brincar "A roda gigante é muito alta e você vê as pessoas lá em baixo como formiguinhas. A visão é muito bonita, seria legal aproveitar essa vista de uma forma mais proveitosa.")
-       "Para entrar num brinquedo você precisa mostrar o seu ticket. Será que você o perdeu?"))))
+           (entrar-brinquedo)
+           "Para entrar num brinquedo você precisa mostrar o seu ticket. Será que você o perdeu?")
+       (if (ride-state esta-no-brinquedo?)
+            (brincar "A roda gigante é muito alta e você vê as pessoas lá em baixo como formiguinhas. A visão é muito bonita, seria legal aproveitar essa vista de uma forma mais proveitosa.")
+            (sair-brinquedo)
+        
+       )))
    (cons south (lambda () lago)))))
 (record-element! 'roda-gigante roda-gigante)
 
