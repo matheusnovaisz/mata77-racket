@@ -145,7 +145,7 @@
 (define pontos (verb (list 'pontos 'pontuacao) "ver pontos" #f))
 (record-element! 'pontos pontos)
 
-(define talk (verb (list 'talk 'falar 'conversar 'interagir) "falar" #t))
+(define talk (verb (list 'talk 'falar 'conversar 'interagir 'chamar) "falar" #t))
 (record-element! 'talk talk)
 
 
@@ -300,15 +300,18 @@
                 (set-thing-state! pessoa #t) 
                 (printf "Olá, amigo. Esse parque proporciona uma visão sensacional. É tão boa que quero que todos saibam como é bonito.\n")
                 "Então por favor, aceite esse binóculos como presente para você aproveitar ao máximo.")))))))
+(record-element! 'pessoa pessoa)
 
-(define caixa-de-ferramenta
-  (thing 'caixa-de-ferramenta
+(define caixa
+  (thing 'caixa
     #f
-    (cons open
+    (list
+     (cons open
       (lambda ()
         (if (have-thing? lanterna)
           "Não há nada aqui."
-          (begin (take-thing! lanterna) "Você encontrou uma lanterna!"))))))
+          (begin (take-thing! lanterna) "Você encontrou uma lanterna!")))))))
+(record-element! 'caixa caixa)
 
 ;; States ----------------------------------------
 ;; Each state changes how the player will react.
@@ -396,7 +399,7 @@
 
 (define barco
   (place "Você está dentro de um barquinho"
-  (list caixa-de-ferramenta)
+  (list caixa)
   (list
     (cons out (lambda () lago)))))
 (record-element! 'barco barco)
