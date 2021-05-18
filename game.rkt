@@ -27,7 +27,9 @@
                actions))    ; list of verb--thing pairs
 
 (struct state (desc ;string
-))    
+))
+ 
+(struct ride ([state #:mutable])) ;define if the character has ridden a feature
 
 ;; Tables mapping names<->things for save and load
 (define names (make-hash))
@@ -41,6 +43,7 @@
 (define (element->name obj) (hash-ref elements obj #f))
 
 
+; Define points to the player
 
 (define (soma-pontos [p 0])
   (let ([n 0])
@@ -133,8 +136,13 @@
 (record-element! 'eat eat)
 
 (define usar (verb (list 'usar 'utilizar 'aplicar) "usar artefato" #t))
+(record-element! 'usar usar)
+
 (define acender (verb (list 'acender 'acionar 'ligar) "acender" #t))
+(record-element! 'acender acender)
+
 (define pontos (verb (list 'pontos 'pontuacao) "ver pontos" #f))
+(record-element! 'pontos pontos)
 
 
 #|
@@ -243,9 +251,12 @@
                 (lambda ()
                   (begin
                   (if (have-thing? binoculos)
-                      
-                      (use-thing binoculos)
-                      "Voce nao esta com o binoculos"))))
+                      (use-thing binoculos "Que incrível! Está tudo tão perto agora, consigo ver todos os detalhes... ")
+                      "Voce nao esta com o binoculos"))
+                  (if (and (thing-state binoculos) (eq? current-place roda-gigante))
+                      (pontuar pontos-bonus)
+                      (pontuar 0))
+                  ))
           )))
 (record-element! 'binoculos binoculos)
 
@@ -299,6 +310,16 @@
 ;; Places ----------------------------------------
 ;; Each place handles a set of non-transitive verbs.
 
+(define brincou? (ride #f))
+
+(define (brincar [msg ""])
+      (set-ride-state! brincou? #t)
+      (if brincou?
+          (pontuar pontos-brinquedo)
+          (pontuar 0))
+  (set-ride-state! brincou? #f)
+  (printf "~a\n" msg))
+
 (define entrada
   (place
    "Bem-vindo ao Parque de Diversões Caverna de Platão. Pegue o seu ticket de entrada, que dará acesso aos nossos brinquedos."
@@ -324,12 +345,21 @@
   (list)
   (list
    (cons in (lambda ()
+              (begin
+                (brincar)
     (if (is-state? barriga-cheia)
       "O passeio foi um pouco radical demais, e você não está se sentindo bem. Algo não bateu certo... Logo depois de sair do carro, você passa mal e vomita tudo que comeu até aqui."
-      "A montanha russa te proporcionou uma adrenalina que você nunca tinha visto antes! Você sente que nada mais pode te assustar. Ou será que não...?")))
-   (cons south (lambda () praca)))))
+      "A montanha russa te proporcionou uma adrenalina que você nunca tinha visto antes! Você sente que nada mais pode te assustar. Ou será que não...?")
+     
+    )))
+   (cons south (lambda () praca))
+   
+   )))
 (record-element! 'montanha-russa montanha-russa)
 
+
+
+      
 
 (define carrossel
   (place "Você chegou ao Carrossel. Ele é muito bonito, com muitas luzes coloridas."
@@ -338,7 +368,7 @@
    (cons in 
           (lambda ()
             (if (have-thing? ticket)
-                "A movimentação do carrossel te deixa tranquilo. Você se lembra do tempo quando ia para o parque quando criança. Você se sente determinado."
+                (brincar "A movimentação do carrossel te deixa tranquilo. Você se lembra do tempo quando ia para o parque quando criança. Você se sente determinado.")
                 "Você não tem o ticket para entrar no brinquedo. Como você entrou no parque sem um ticket? Temos aqui um invasor?"
                 )))
    (cons east (lambda () lago))
@@ -361,9 +391,9 @@
   (list
    (cons in (lambda () 
     (if (and (have-thing? ticket) (have-thing? binoculos))
-      "Você se lembra que tem um binóculos na sua mochila. Usando o binóculos você contempla totalmente a vista do parque, se estendendo pelo vale onde ele se encontra. "
+      "Você se lembra que tem um binóculos na sua mochila? Usando o binóculos você contempla totalmente a vista do parque, se estendendo pelo vale onde ele se encontra. "
       (if (have-thing? ticket)
-       "A roda gigante é muito alta e você vê as pessoas lá em baixo como formiguinhas. A visão é muito bonita, seria legal aproveitar essa vista de uma forma mais proveitosa."
+       (brincar "A roda gigante é muito alta e você vê as pessoas lá em baixo como formiguinhas. A visão é muito bonita, seria legal aproveitar essa vista de uma forma mais proveitosa.")
        "Para entrar num brinquedo você precisa mostrar o seu ticket. Será que você o perdeu?"))))
    (cons south (lambda () lago)))))
 (record-element! 'roda-gigante roda-gigante)
@@ -373,7 +403,14 @@
 do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder."
   (list)
   (list
-   (cons in (lambda () (set-player-state! amedrontado)))
+   (cons in (lambda ()
+              
+              (set-player-state! amedrontado)
+              (if (and (have-thing? ticket) (have-thing? lanterna))
+      "Você está com uma lanterna na sua mochila. Se você estiver com sorte ela pode estar com bateria e você poderia usá-la."
+      (if (have-thing? ticket)
+       (brincar "Aqui dentro é bem escuro, você não consegue ver absolutamente nada. Será que há alguma luz por aqui? Isso seria bastante útil...")
+       "Para entrar num brinquedo você precisa mostrar o seu ticket. Será que você o perdeu?"))))
    (cons west (lambda () praca)))))
 (record-element! 'mansao mansao)
 
@@ -414,10 +451,12 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
 (define (consume-thing! t) 
   (set! stuff (remq t stuff)))
 
-(define (use-thing t)
+(define (use-thing t msg)
   (if
    (eq? (thing-state t) #f) (set-thing-state! t #t)
-   (set-thing-state! t #f)))
+   (set-thing-state! t #f))
+  (printf "~a\n" msg)
+  )
 
 (define (is-state? s)
   (memq s player-state))
