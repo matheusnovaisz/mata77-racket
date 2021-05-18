@@ -93,6 +93,11 @@
 (define load (verb (list 'load 'carregar) (symbol->string 'load) #f))
 (record-element! 'load load)
 
+(define buy (verb (list 'buy 'comprar) "comprar" #f))
+(record-element! 'buy buy)
+
+(define eat (verb (list 'eat 'comer) "comer" #t))
+(record-element! 'eat eat)
 
 (define usar (verb (list 'usar 'utilizar 'aplicar) "usar artefato" #t))
 (define acender (verb (list 'acender 'acionar 'ligar) "acender" #t))
@@ -103,7 +108,7 @@
 (define all-verbs
   (list north south east west up down in out
         get put open close knock quit
-        look inventory help save load))
+        look inventory help save load buy))
 |#
 
 
@@ -233,6 +238,20 @@
           )))
 (record-element! 'venda venda)
 
+(define comida
+  (thing 'comida
+         #f
+         (list
+          (cons eat
+                (lambda ()
+                  (if (have-thing? comida)
+                      (and (drop-thing! comida) "Você se sente revigorado e pronto para explorar o parque. Só tome cuidado para não passar mal em certos brinquedos...")
+                      "Voce nao tem nada para comer.")))
+          )))
+(record-element! 'comida comida)
+
+
+
 
 ;; Places ----------------------------------------
 ;; Each place handles a set of non-transitive verbs.
@@ -261,6 +280,10 @@
   (place "Você chegou na Montanha Russa, a atração do parque"
   (list)
   (list
+   (cons in (lambda ()
+    (if (thing-state comida)
+      "O passeio foi um pouco radical demais, e você não está se sentindo bem. Algo não bateu certo... Logo depois de sair do carro, você passa mal e vomita tudo que comeu até aqui."
+      "A montanha russa te proporcionou uma adrenalina que você nunca tinha visto antes! Você sente que nada mais pode te assustar. Ou será que não...?")))
    (cons south (lambda () praca)))))
 (record-element! 'montanha-russa montanha-russa)
 
@@ -269,12 +292,19 @@
   (place "Você chegou ao Carrossel. Ele é muito bonito, com muitas luzes coloridas."
   (list)
   (list
-   (cons east (lambda () lago)))))
+   (cons in 
+          (lambda ()
+            (if (have-thing? ticket)
+                "A movimentação do carrossel te deixa tranquilo. Você se lembra do tempo quando ia para o parque quando criança. Você se sente determinado."
+                "Você não tem o ticket para entrar no brinquedo. Como você entrou no parque sem um ticket? Temos aqui um invasor?"
+                )))
+   (cons east (lambda () lago))
+   )))
 (record-element! 'carrossel carrossel)
 
 (define lago
   (place "Você se depara com um pequeno lago."
-  (list)
+  (list binoculos)
   (list
    (cons north (lambda () roda-gigante))
    (cons east (lambda () praca))
@@ -286,6 +316,12 @@
   (place "Você está em frente à Roda Gigante e... UAU! Ela é realmente GIGANTE. Com certeza te dará uma boa visão do parque."
   (list)
   (list
+   (cons in (lambda () 
+    (if (and (have-thing? ticket) (have-thing? binoculos))
+      "Você se lembra que tem um binóculos na sua mochila. Usando o binóculos você contempla totalmente a vista do parque, se estendendo pelo vale onde ele se encontra. "
+      (if (have-thing? ticket)
+       "A roda gigante é muito alta e você vê as pessoas lá em baixo como formiguinhas. A visão é muito bonita, seria legal aproveitar essa vista de uma forma mais proveitosa."
+       "Para entrar num brinquedo você precisa mostrar o seu ticket. Será que você o perdeu?"))))
    (cons south (lambda () lago)))))
 (record-element! 'roda-gigante roda-gigante)
 
@@ -301,6 +337,7 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (place "Seguindo o aroma, você chegou nas barraquinhas de comida."
   (list)
   (list
+   (cons buy (lambda () (and (take-thing! comida) "Você comprou comida.")))
    (cons north (lambda () lago)))))
 (record-element! 'barracas barracas)
 
