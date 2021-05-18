@@ -26,6 +26,9 @@
                [things #:mutable] ; list of things
                actions))    ; list of verb--thing pairs
 
+(struct state (desc ;string
+))    
+
 ;; Tables mapping names<->things for save and load
 (define names (make-hash))
 (define elements (make-hash))
@@ -111,6 +114,9 @@
 (define inventory (verb (list 'inventory 'mochila) "mostrar objetos da mochila" #f))
 (record-element! 'inventory inventory)
 
+(define mind (verb (list 'mind 'estado) "demonstrar o estado do seu personagem" #f))
+(record-element! 'mind mind)
+
 (define help (verb (list 'help 'ajuda) (symbol->string 'help) #f))
 (record-element! 'help help)
 
@@ -153,6 +159,7 @@
    (cons quit (lambda () (begin (printf "Espero que tenha se divertido. Tchau! ;)\n") (exit))))
    (cons look (lambda () (show-current-place)))
    (cons inventory (lambda () (show-inventory)))
+   (cons mind (lambda () (show-states)))
    (cons save (lambda () (save-game)))
    (cons load (lambda () (load-game)))
    (cons help (lambda () (show-help)))
@@ -276,12 +283,17 @@
           (cons eat
                 (lambda ()
                   (if (have-thing? comida)
-                      (and (drop-thing! comida) "Você se sente revigorado e pronto para explorar o parque. Só tome cuidado para não passar mal em certos brinquedos...")
+                      (and (set-player-state! barriga-cheia) (consume-thing! comida) "Você se sente revigorado e pronto para explorar o parque. Só tome cuidado para não passar mal em certos brinquedos...")
                       "Voce nao tem nada para comer.")))
           )))
 (record-element! 'comida comida)
 
+;; States ----------------------------------------
+;; Each state changes how the player will react.
 
+(define barriga-cheia (state "de barriga cheia"))
+
+(define amedrontado (state "amedrontado"))
 
 
 ;; Places ----------------------------------------
@@ -312,7 +324,7 @@
   (list)
   (list
    (cons in (lambda ()
-    (if (thing-state comida)
+    (if (is-state? barriga-cheia)
       "O passeio foi um pouco radical demais, e você não está se sentindo bem. Algo não bateu certo... Logo depois de sair do carro, você passa mal e vomita tudo que comeu até aqui."
       "A montanha russa te proporcionou uma adrenalina que você nunca tinha visto antes! Você sente que nada mais pode te assustar. Ou será que não...?")))
    (cons south (lambda () praca)))))
@@ -361,6 +373,7 @@
 do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder."
   (list)
   (list
+   (cons in (lambda () (set-player-state! amedrontado)))
    (cons west (lambda () praca)))))
 (record-element! 'mansao mansao)
 
@@ -377,6 +390,9 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
 
 ;; Things carried by the player:
 (define stuff null) ; list of things
+
+;; States of the player:
+(define player-state null) ; list of states
 
 ;; Current location:
 (define current-place entrada) ; place
@@ -395,10 +411,19 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
                      (cons t (place-things current-place)))
   (set! stuff (remq t stuff)))
 
+(define (consume-thing! t) 
+  (set! stuff (remq t stuff)))
+
 (define (use-thing t)
   (if
    (eq? (thing-state t) #f) (set-thing-state! t #t)
    (set-thing-state! t #f)))
+
+(define (is-state? s)
+  (memq s player-state))
+
+(define (set-player-state! s)
+  (set! player-state (cons s player-state)))
 
 ;; ============================================================
 ;; Game execution
@@ -505,6 +530,16 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
       (for-each (lambda (thing) ; aplica esta função a cada coisa da lista
                   (printf "\n  -> tem um(a) ~a" (thing-name thing)))
                 stuff))
+  (printf "\n"))
+
+;; Show how the player are:
+(define (show-states)
+  (printf "Você está")
+  (if (null? player-state)
+      (printf "se sentindo normal.")
+      (for-each (lambda (desc) ; aplica esta função a cada coisa da lista
+                  (printf "\n -> ~a." (state-desc desc)))
+                player-state))
   (printf "\n"))
 
 ;; Look for a command match in a list of verb--response pairs,
