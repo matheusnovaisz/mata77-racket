@@ -3,6 +3,16 @@
 ;; ============================================================
 ;; Model:
 
+(define logo "
+▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄
+░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░
+
+ ▄▄   █▀▀ ▄▀█ █░█ █▀▀ █▀█ █▄░█ ▄▀█   █▀▄ █▀▀   █▀█ █░░ ▄▀█ ▀█▀ ▄▀█ █▀█   ▄▄
+ ░░   █▄▄ █▀█ ▀▄▀ ██▄ █▀▄ █░▀█ █▀█   █▄▀ ██▄   █▀▀ █▄▄ █▀█ ░█░ █▀█ █▄█   ░░
+
+▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄
+░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░")
+
 ;; Elements of the world:
 (struct verb (aliases       ; list of symbols
               desc          ; string
@@ -26,6 +36,23 @@
 
 (define (name->element name) (hash-ref names name #f))
 (define (element->name obj) (hash-ref elements obj #f))
+
+
+
+(define (soma-pontos [p 0])
+  (let ([n 0])
+    (lambda (p)
+      (set! n (+ n p))
+      n)))
+
+(define pontuar (soma-pontos))
+
+(define pontos-brinquedo 100)
+
+(define pontos-bonus 200)
+
+(define (mostrar-pontos)
+  (printf "Você tem ~a pontos\n" (pontuar 0)))
 
 ;; ============================================================
 ;; The world:
@@ -101,6 +128,7 @@
 
 (define usar (verb (list 'usar 'utilizar 'aplicar) "usar artefato" #t))
 (define acender (verb (list 'acender 'acionar 'ligar) "acender" #t))
+(define pontos (verb (list 'pontos 'pontuacao) "ver pontos" #f))
 
 
 #|
@@ -127,7 +155,8 @@
    (cons inventory (lambda () (show-inventory)))
    (cons save (lambda () (save-game)))
    (cons load (lambda () (load-game)))
-   (cons help (lambda () (show-help)))))
+   (cons help (lambda () (show-help)))
+   (cons pontos (lambda () (mostrar-pontos)))))
 
 ;; Things ----------------------------------------
 ;; Each thing handles a set of transitive verbs.
@@ -205,9 +234,11 @@
                       "Voce nao esta com o binoculos.")))
           (cons usar
                 (lambda ()
+                  (begin
                   (if (have-thing? binoculos)
+                      
                       (use-thing binoculos)
-                      "Voce nao esta com o binoculos")))
+                      "Voce nao esta com o binoculos"))))
           )))
 (record-element! 'binoculos binoculos)
 
@@ -366,8 +397,8 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
 
 (define (use-thing t)
   (if
-   (eq? (thing-state t) #t) (set-thing-state! t #f)
-   (set-thing-state! t #t)))
+   (eq? (thing-state t) #f) (set-thing-state! t #t)
+   (set-thing-state! t #f)))
 
 ;; ============================================================
 ;; Game execution
@@ -551,5 +582,5 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
 
 ;; ============================================================
 ;; Go!
-
+(printf "~a\n\n\n\n\n" logo)
 (do-place)
