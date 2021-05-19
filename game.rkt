@@ -1,17 +1,10 @@
 #lang racket
 
+(require "ascii.rkt")
+
 ;; ============================================================
 ;; Model:
 
-(define logo "
-▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄
-░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░
-
- ▄▄   █▀▀ ▄▀█ █░█ █▀▀ █▀█ █▄░█ ▄▀█   █▀▄ █▀▀   █▀█ █░░ ▄▀█ ▀█▀ ▄▀█ █▀█   ▄▄
- ░░   █▄▄ █▀█ ▀▄▀ ██▄ █▀▄ █░▀█ █▀█   █▄▀ ██▄   █▀▀ █▄▄ █▀█ ░█░ █▀█ █▄█   ░░
-
-▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄
-░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░")
 
 (define msg-inicial "Olá, seja bem vindo ao Parque de Diversões Caverna de Platão! Prepare-se para viver grandes momentos
 de aventura! Você precisará ser muito esperto para completar todas as missões e ganhar todos os pontos
@@ -21,23 +14,7 @@ que você se saia bem, e principalmente, se divirta. Lembre-se sempre de ficar a
 ela pode carregar coisas valiosas em vários momentos.
 Boa sorte!")
 
-(define trofeu "
-            .............---            
-       .....:..::::::::::///-....       
-      `:.`..:-:::::::::::///-.`.:`      
-       :.  `:-:::://///::///`  .:       
-       -:   -:-:://////:://:   :-       
-        --` `:-:::////::///` `--        
-         .--.-:::::::::://-.--.         
-            ``.-:::::::/:.``            
-                `.-:/-.`                
-                  `:/`                  
-                  -::-                  
-               `.-:::/--.               
-            +sooooooooooooy+            
-            os--------::::ys            
-           `shsoooosssssssds`           
-           /////++++++++++++/")
+
 
 ;; Elements of the world:
 (struct verb (aliases       ; list of symbols
@@ -373,7 +350,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU!\n\n\n ~a" trofeu)]
     (lambda ()
     (if (thing-state lanterna)
       (if (thing-state presenca)
-      (begin (set-player-state! amedrontado) "O Fofão se mantém imóvel, olhando para você... Talvez ele seja mesmo assustador.")
+      (begin (set-player-state! amedrontado) fofao)
       (begin (set-thing-state! presenca #t) "Por estar com a lanterna acesa, você percebe que a presenca na sala nada mais é que um boneco do fofão mofado. Apesar da sua face bizarra, você se sente mais tranquilo.")
       )
       (begin (set-player-state! amedrontado) "...")))))))
@@ -515,7 +492,6 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (list)
   (list
    (cons buy (lambda () (and (take-thing! comida) "Você comprou comida.")))
-   
    (cons north (lambda () lago)))))
 (record-element! 'barracas barracas)
 
