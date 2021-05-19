@@ -13,6 +13,14 @@
 ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄
 ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░")
 
+(define msg-inicial "Olá, seja bem vindo ao Parque de Diversões Caverna de Platão! Prepare-se para viver grandes momentos
+de aventura! Você precisará ser muito esperto para completar todas as missões e ganhar todos os pontos
+necessários para receber nossos grandiosos prêmios. E também muito corajoso, porque... Não, não vamos
+adiantar o que há por vir. Se arrisque e descubra tudo que o parque tem a oferecer. Esperamos
+que você se saia bem, e principalmente, se divirta. Lembre-se sempre de ficar atento à sua mochila,
+ela pode carregar coisas valiosas em vários momentos.
+Boa sorte!")
+
 (define trofeu "
             .............---            
        .....:..::::::::::///-....       
@@ -354,6 +362,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
 ;; Each state changes how the player will react.
 
 (define barriga-cheia (state "de barriga cheia" #f))
+(define amedrontado (state "amedrontado" #f))
 
 ;; Ride States ----------------------------------------
 ;; Define if a ride was taken
@@ -375,7 +384,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
 
 (define entrada
   (place
-   "Bem-vindo ao Parque de Diversões Caverna de Platão. Pegue o seu ticket de entrada, que dará acesso aos nossos brinquedos."
+   "Você está na bilheteria do parque. Pegue o seu ticket de entrada, que dará acesso aos nossos brinquedos."
    (list ticket)
    (list
     (cons north 
@@ -454,7 +463,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
   (place "A roda gigante é muito alta e você vê as pessoas lá em baixo como formiguinhas. A visão é muito bonita, seria legal aproveitar essa vista de uma forma mais proveitosa."
     (list)
     (list
-     (cons quit (lambda () roda-gigante))
+     (cons out (lambda () roda-gigante))
      (cons south (lambda () roda-gigante))
      )))
 
@@ -708,7 +717,7 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
 (define (show-states)
   (printf "Você está")
   (if (null? player-state)
-      (printf "se sentindo normal.")
+      (printf " se sentindo normal.")
       (for-each (lambda (desc) ; aplica esta função a cada coisa da lista
                   (printf "\n -> ~a." (state-desc desc)))
                 player-state))
@@ -790,6 +799,7 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
 ;; ============================================================
 ;; Go!
 (printf "~a\n\n\n\n\n" logo)
+(printf "~a\n\n" msg-inicial)
 
 (define (executa)
   (if (andou-todos-brinquedos)
