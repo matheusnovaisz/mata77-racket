@@ -163,7 +163,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
 (define inventory (verb (list 'inventory 'mochila) "mostrar objetos da mochila" #f))
 (record-element! 'inventory inventory)
 
-(define mind (verb (list 'mind 'estado) "demonstrar o estado do seu personagem" #f))
+(define mind (verb (list 'mind 'mente 'estado) "demonstrar o estado do seu personagem" #f))
 (record-element! 'mind mind)
 
 (define help (verb (list 'help 'ajuda) (symbol->string 'help) #f))
@@ -190,7 +190,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
 (define pontos (verb (list 'pontos 'pontuacao) "ver pontos" #f))
 (record-element! 'pontos pontos)
 
-(define talk (verb (list 'talk 'falar 'conversar 'interagir 'chamar) "falar" #t))
+(define talk (verb (list 'talk 'falar 'conversar 'interagir 'chamar 'invocar) "falar" #t))
 (record-element! 'talk talk)
 
 
@@ -213,7 +213,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
 
 (define everywhere-actions
   (list
-   (cons quit (lambda () (begin (printf "Espero que tenha se divertido. Tchau! ;)\n") (exit))))
+   (cons quit (lambda () (begin (verifica-pontos) (printf "Espero que tenha se divertido. Tchau! ;)\n") (exit))))
    (cons look (lambda () (show-current-place)))
    (cons inventory (lambda () (show-inventory)))
    (cons mind (lambda () (show-states)))
@@ -278,12 +278,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
                 (lambda ()
                   (begin
                   (if (have-thing? lanterna)
-                      (if (or (eq? current-place mansao)
-                              (eq? current-place mansao-entrada)
-                              (eq? current-place mansao-meio)
-                              (eq? current-place mansao-sala)
-                              (eq? current-place mansao-deposito)
-                              (eq? current-place mansao-norte))
+                      (if (eq? current-place mansao-interior)
                        (begin (use-thing lanterna "Agora que a lanterna está acesa você consegue ver algumas coisas dentro da mansão.")
                               (pontuar pontos-bonus))
                        "A lanterna está acesa.")
@@ -293,12 +288,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
                 (lambda ()
                   (begin
                   (if (have-thing? lanterna)
-                      (if (or (eq? current-place mansao)
-                              (eq? current-place mansao-entrada)
-                              (eq? current-place mansao-meio)
-                              (eq? current-place mansao-sala)
-                              (eq? current-place mansao-deposito)
-                              (eq? current-place mansao-norte))
+                      (if (eq? current-place mansao-interior)
                        (begin (use-thing lanterna "Agora que a lanterna está acesa você consegue ver algumas coisas dentro da mansão.")
                               (pontuar pontos-bonus))
                        "A lanterna está acesa.")
@@ -355,10 +345,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
     (list
       (cons talk
         (lambda ()
-          (if (and 
-                ;;; (have-thing? binoculos) 
-                (thing-state pessoa)
-                )
+          (if (thing-state pessoa)
             "Olá de novo, amigo. Espero que esteja se divertindo."
               (begin 
                 (take-thing! binoculos) 
@@ -377,6 +364,19 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
           "Não há nada aqui."
           (begin (take-thing! lanterna) "Você encontrou uma lanterna!")))))))
 (record-element! 'caixa caixa)
+
+(define presenca
+  (thing 'presenca
+  #f
+  (list
+  (cons talk
+    (lambda ()
+    (if (thing-state lanterna)
+      (if (thing-state presenca)
+      (begin (set-player-state! amedrontado) "O Fofão se mantém imóvel, olhando para você... Talvez ele seja mesmo assustador.")
+      (begin (set-thing-state! presenca #t) "Por estar com a lanterna acesa, você percebe que a presenca na sala nada mais é que um boneco do fofão mofado. Apesar da sua face bizarra, você se sente mais tranquilo.")
+      )
+      (begin (set-player-state! amedrontado) "...")))))))
 
 ;; States ----------------------------------------
 ;; Each state changes how the player will react.
@@ -408,7 +408,9 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
    (list ticket)
    (list
     (cons north 
-          (lambda () praca)))))
+          (lambda () praca))
+    (cons out
+           (lambda () (begin (verifica-pontos) (exit)))))))
 (record-element! 'entrada entrada)
 
 (define praca
@@ -494,79 +496,19 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (list
    (cons in (lambda ()
       (if (have-thing? ticket)
-       (begin (brincar ticket-mansao "Você toma coragem e decide enfrentar a Mansão do Terror!" #:place mansao-entrada) )
+       (begin (brincar ticket-mansao "Você toma coragem e decide enfrentar a Mansão do Terror!" #:place mansao-interior) )
        "Para entrar num brinquedo você precisa mostrar o seu ticket. Será que você o perdeu?")))
    (cons west (lambda () praca)))))
 (record-element! 'mansao mansao)
 
-(define mansao-entrada
+(define mansao-interior
   (place 
-    (if (thing-state lanterna)
-    "Você está na área de recepção da mansão."
-    "Está muito escuro para discernir bem o que está na sua frente. Porém você percebe que é um lugar amplo.")
-  (list)
+    "Você está dentro da Mansão do Terror. O ambiente é bem escuro, e você percebe alguns ruídos."
+  (list presenca)
   (list 
-    (cons north (lambda () mansao-meio))
-    (cons east (lambda () mansao-sala))
-    (cons west (lambda () mansao-deposito))
-    (cons south (lambda () mansao))
+    (cons out (lambda () mansao))
   )))
-(record-element! 'mansao-entrada mansao-entrada)
-
-(define mansao-meio
-  (place "Meio da Mansão"
-  (list)
-  (list
-    (cons south (lambda () mansao-entrada))
-    (cons north (lambda () mansao-norte))
-    (cons east (lambda () (begin (pontuar -50) mansao-monstro)))
-    )))
-(record-element! 'mansao-meio mansao-meio)
-
-(define mansao-sala
-  (place "Sala da Mansão"
-  (list)
-  (list
-    (cons west (lambda () mansao-entrada)))))
-(record-element! 'mansao-sala mansao-sala)
-
-(define mansao-deposito
-  (place 
-    (if (thing-state lanterna)
-      "Você percebe que está num depósito. "
-      "Você não consegue perceber nada além do cheiro forte da sala. Porém ao fechar os olhos, você percebe uma silhueta do que parece um cádaver!")
-  (list)
-  (list
-    (cons east (lambda () mansao)))))
-(record-element! 'mansao-deposito mansao-deposito)
-
-(define mansao-norte
-  (place "Norte da Mansão"
-  (list)
-  (list
-    (cons south (lambda () mansao-meio))
-    (cons east (lambda () (and "Você encontrou a saída, finalmente." mansao)))
-    )))
-(record-element! 'mansao-norte mansao-norte)
-
-(define mansao-saida
-  (place "Você saiu da mansão"
-  (list)
-  (list
-    (cons south (lambda () (begin (pontuar -50) mansao-monstro )))
-    (cons east (lambda () mansao-norte))
-    )))
-(record-element! 'mansao-saida mansao-saida)
-
-(define mansao-monstro
-  (place "Você encontrou o monstro, e ele te deu um baita susto! Isso te custará 50 pontos"
-  (list)
-  (list
-    (cons south (lambda () mansao-sala))
-    (cons north (lambda () (begin (printf "Você encontrou a saída, finalmente.\n") mansao)))
-    (cons west (lambda () mansao-meio))
-    )))
-(record-element! 'mansao-monstro mansao-monstro)
+(record-element! 'mansao-interior mansao-interior)
 
 (define barracas
   (place "Seguindo o aroma, você chegou nas barraquinhas de comida."
@@ -763,6 +705,7 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
 (define (show-help)
   (printf "Use 'olhar' para olhar o que há em volta.\n")
   (printf "Use 'mochila' para ver os objetos que você está levando consigo.\n")
+  (printf "Use 'mente' ou 'estado' para ver o estado do seu personagem\n")
   (printf "Use 'salvar' ou 'carregar' para salvar ou restaurar um jogo\n")
   (printf "Existe alguns outros verbos, e você pode nomear uma coisa a partir de um verbo.\n"))
 
