@@ -81,7 +81,7 @@ Boa sorte!")
 
 (define pontuar (soma-pontos))
 
-(define pontos-brinquedo 100)
+(define pontos-brinquedo 150)
 
 (define pontos-bonus 200)
 
@@ -91,14 +91,14 @@ Boa sorte!")
 (define (verifica-pontos)
   (let ([pontos (pontuar 0)])
     (cond
-      [(eq? pontos 800)
-        (printf "PARABÉNS, VOCÊ GANHOU! O SEU PRÊMIO É ENTRADA GRATUITA E VITALÍCIA PARA TODOS OS BRINQUEDOS DO PARQUE CAVERNA DE PLATÃO, ALÉM DESSE BELO TROFÉU! ~a\n"
+      [(eq? pontos 1000)
+        (printf "\n\n\nPARABÉNS, VOCÊ GANHOU! O SEU PRÊMIO É ENTRADA GRATUITA E VITALÍCIA PARA TODOS OS BRINQUEDOS DO PARQUE CAVERNA DE PLATÃO, ALÉM DESSE BELO TROFÉU! ~a\n\n\n"
  trofeu)]
-      [(eq? pontos 750)
-            (printf "AAAH, QUASE! VOCÊ FOI MUITO BEM, MAS INFELIZMENTE NÃO GANHOU O NOSSO MAIOR PRÊMIO :(
-MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
+      [(eq? pontos 950)
+            (printf "\n\n\nAAAH, QUASE! VOCÊ FOI MUITO BEM, MAS INFELIZMENTE NÃO GANHOU O NOSSO MAIOR PRÊMIO :(
+MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU!\n\n\n ~a" trofeu)]
       [else
-       (printf "AAH, POXA VIDA :( NÃO FOI DESSA VEZ QUE VOCÊ GANHOU NOSSOS MARAVILHOSOS PRÊMIOS. TENTE NOVAMENTE, ADORAMOS TER VOCÊ POR AQUI!")])))
+       (printf "\n\n\nAAH, POXA VIDA :( NÃO FOI DESSA VEZ QUE VOCÊ GANHOU NOSSOS MARAVILHOSOS PRÊMIOS. TENTE NOVAMENTE, ADORAMOS TER VOCÊ POR AQUI!\n\n\n")])))
 
 (define (andou-todos-brinquedos)
   (if (>= (length rides-states) 4)
