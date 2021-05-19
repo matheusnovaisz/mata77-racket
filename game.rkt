@@ -13,6 +13,24 @@
 ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄ ▄▄
 ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░ ░░")
 
+(define trofeu "
+            .............---            
+       .....:..::::::::::///-....       
+      `:.`..:-:::::::::::///-.`.:`      
+       :.  `:-:::://///::///`  .:       
+       -:   -:-:://////:://:   :-       
+        --` `:-:::////::///` `--        
+         .--.-:::::::::://-.--.         
+            ``.-:::::::/:.``            
+                `.-:/-.`                
+                  `:/`                  
+                  -::-                  
+               `.-:::/--.               
+            +sooooooooooooy+            
+            os--------::::ys            
+           `shsoooosssssssds`           
+           /////++++++++++++/")
+
 ;; Elements of the world:
 (struct verb (aliases       ; list of symbols
               desc          ; string
@@ -61,6 +79,24 @@
 
 (define (mostrar-pontos)
   (printf "Você tem ~a pontos\n" (pontuar 0)))
+
+(define (verifica-pontos)
+  (let ([pontos (pontuar 0)])
+    (cond
+      [(eq? pontos 800)
+        (printf "PARABÉNS, VOCÊ GANHOU! O SEU PRÊMIO É ENTRADA GRATUITA E VITALÍCIA PARA TODOS OS BRINQUEDOS DO PARQUE CAVERNA DE PLATÃO, ALÉM DESSE BELO TROFÉU! ~a\n"
+ trofeu)]
+      [(eq? pontos 750)
+            (printf "AAAH, QUASE! VOCÊ FOI MUITO BEM, MAS INFELIZMENTE NÃO GANHOU O NOSSO MAIOR PRÊMIO :(
+MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
+      [else
+       (printf "AAH, POXA VIDA :( NÃO FOI DESSA VEZ QUE VOCÊ GANHOU NOSSOS MARAVILHOSOS PRÊMIOS. TENTE NOVAMENTE, ADORAMOS TER VOCÊ POR AQUI!")])))
+
+(define (andou-todos-brinquedos)
+  (if (>= (length rides-states) 4)
+      #t
+      #f))
+      
 
 ;; ============================================================
 ;; The world:
@@ -754,4 +790,9 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
 ;; ============================================================
 ;; Go!
 (printf "~a\n\n\n\n\n" logo)
-(do-place)
+
+(define (executa)
+  (if (andou-todos-brinquedos)
+      (begin (verifica-pontos) (exit))
+      (do-place)))
+(executa)
