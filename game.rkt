@@ -276,14 +276,34 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
                       "Voce nao esta com a lanterna.")))
           (cons usar
                 (lambda ()
+                  (begin
                   (if (have-thing? lanterna)
-                      (use-thing lanterna)
-                      "Voce nao esta com a lanterna")))
+                      (if (or (eq? current-place mansao)
+                              (eq? current-place mansao-entrada)
+                              (eq? current-place mansao-meio)
+                              (eq? current-place mansao-sala)
+                              (eq? current-place mansao-deposito)
+                              (eq? current-place mansao-norte))
+                       (begin (use-thing lanterna "Agora que a lanterna está acesa você consegue ver algumas coisas dentro da mansão.")
+                              (pontuar pontos-bonus))
+                       "A lanterna está acesa.")
+                      "Voce nao esta com a lanterna")
+                  )))
           (cons acender
                 (lambda ()
+                  (begin
                   (if (have-thing? lanterna)
-                      (use-thing lanterna)
-                      "Voce nao esta com a lanterna")))
+                      (if (or (eq? current-place mansao)
+                              (eq? current-place mansao-entrada)
+                              (eq? current-place mansao-meio)
+                              (eq? current-place mansao-sala)
+                              (eq? current-place mansao-deposito)
+                              (eq? current-place mansao-norte))
+                       (begin (use-thing lanterna "Agora que a lanterna está acesa você consegue ver algumas coisas dentro da mansão.")
+                              (pontuar pontos-bonus))
+                       "A lanterna está acesa.")
+                      "Voce nao esta com a lanterna")
+                  )))
           )))
 (record-element! 'lanterna lanterna)
 
@@ -310,8 +330,8 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU! ~a" trofeu)]
                   (begin
                   (if (have-thing? binoculos)
                     (if (eq? current-place topo-roda-gigante)
-                      (begin (pontuar pontos-bonus) "Você se lembra que tem um binóculos na sua mochila? Usando o binóculos você contempla totalmente a vista do parque, se estendendo pelo vale onde ele se encontra." )
-                      (use-thing binoculos "Que incrível! Está tudo tão perto agora, consigo ver todos os detalhes... "))
+                      (begin (pontuar pontos-bonus) "Que incrível! Está tudo tão perto agora, você consegue ver todos os detalhes... Usando o binóculos você contempla totalmente a vista do parque, se estendendo pelo vale onde ele se encontra." )
+                      (use-thing binoculos "Que incrível! Está tudo tão perto agora, você consegue ver todos os detalhes... "))
                       "Voce nao esta com o binoculos")
           ))))
           ))
@@ -499,7 +519,7 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (list
     (cons south (lambda () mansao-entrada))
     (cons north (lambda () mansao-norte))
-    (cons east (lambda () mansao-monstro))
+    (cons east (lambda () (begin (pontuar -50) mansao-monstro)))
     )))
 (record-element! 'mansao-meio mansao-meio)
 
@@ -533,17 +553,17 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (place "Você saiu da mansão"
   (list)
   (list
-    (cons south (lambda () mansao-monstro))
+    (cons south (lambda () (begin (pontuar -50) mansao-monstro )))
     (cons east (lambda () mansao-norte))
     )))
 (record-element! 'mansao-saida mansao-saida)
 
 (define mansao-monstro
-  (place "Você encontrou o monstro"
+  (place "Você encontrou o monstro, e ele te deu um baita susto! Isso te custará 50 pontos"
   (list)
   (list
     (cons south (lambda () mansao-sala))
-    (cons north (lambda () (begin "Você encontrou a saída, finalmente." mansao)))
+    (cons north (lambda () (begin (printf "Você encontrou a saída, finalmente.\n") mansao)))
     (cons west (lambda () mansao-meio))
     )))
 (record-element! 'mansao-monstro mansao-monstro)
