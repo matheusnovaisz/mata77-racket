@@ -27,6 +27,7 @@
                actions))    ; list of verb--thing pairs
 
 (struct state (desc ;string
+               [status #:mutable]
 ))
  
 (struct ride (desc 
@@ -316,9 +317,7 @@
 ;; States ----------------------------------------
 ;; Each state changes how the player will react.
 
-(define barriga-cheia (state "de barriga cheia"))
-
-(define amedrontado (state "amedrontado"))
+(define barriga-cheia (state "de barriga cheia" #f))
 
 ;; Ride States ----------------------------------------
 ;; Define if a ride was taken
@@ -364,7 +363,7 @@
   (list
    (cons in (lambda ()
    (if (have-thing? ticket)
-    (if (is-state? barriga-cheia)
+    (if (state-status barriga-cheia)
       (brincar ticket-montanha-russa  "O passeio foi um pouco radical demais, e você não está se sentindo bem. Algo não bateu certo... Logo depois de sair do carro, você passa mal e vomita tudo que comeu até aqui." #:penalties 50)
       (brincar ticket-montanha-russa "A montanha russa te proporcionou uma adrenalina que você nunca tinha visto antes! Você sente que nada mais pode te assustar. Ou será que não...?"))
       "Alto lá! A montanha russa é um dos brinquedos mais movimentados do parque. Você precisa apresentar o seu ticket de entrada para poder brincar.")))
@@ -379,7 +378,7 @@
    (cons in 
           (lambda ()
             (if (have-thing? ticket)
-                (brincar ticket-carrossel "A movimentação do carrossel te deixa tranquilo. Você se lembra do tempo quando ia para o parque quando criança. Você se sente determinado.")
+                (brincar ticket-carrossel "A movimentação do carrossel te deixa tranquilo. Você se lembra do tempo quando ia para o parque quando criança. Você se sente determinado. Mas.. que engraçado. Tem uma venda no seu cavalo!")
                 "Você não tem o ticket para entrar no brinquedo. Como você entrou no parque sem um ticket? Temos aqui um invasor?"
                 )))
    (cons east (lambda () lago))
@@ -509,6 +508,7 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (list)
   (list
    (cons buy (lambda () (and (take-thing! comida) "Você comprou comida.")))
+   (cons eat (lambda () (set-state-status! barriga-cheia #t) "Você comeu"))
    (cons north (lambda () lago)))))
 (record-element! 'barracas barracas)
 
@@ -551,8 +551,6 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (printf "~a\n" msg)
   )
 
-(define (is-state? s)
-  (memq s player-state))
 
 (define (set-player-state! s)
   (set! player-state (cons s player-state)))
