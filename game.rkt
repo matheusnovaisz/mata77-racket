@@ -378,7 +378,7 @@
    (cons in 
           (lambda ()
             (if (have-thing? ticket)
-                (brincar ticket-carrossel "A movimentação do carrossel te deixa tranquilo. Você se lembra do tempo quando ia para o parque quando criança. Você se sente determinado. Mas.. que engraçado. Tem uma venda no seu cavalo!")
+                (brincar ticket-carrossel "A movimentação do carrossel te deixa tranquilo. Você se lembra do tempo quando ia para o parque quando criança. Você se sente determinado.")
                 "Você não tem o ticket para entrar no brinquedo. Como você entrou no parque sem um ticket? Temos aqui um invasor?"
                 )))
    (cons east (lambda () lago))
