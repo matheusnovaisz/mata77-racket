@@ -515,7 +515,7 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (list)
   (list
    (cons buy (lambda () (and (take-thing! comida) "Você comprou comida.")))
-   (cons eat (lambda () (set-state-status! barriga-cheia #t) "Você comeu"))
+   
    (cons north (lambda () lago)))))
 (record-element! 'barracas barracas)
 
