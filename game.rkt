@@ -683,7 +683,11 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (printf "Use 'mochila' para ver os objetos que você está levando consigo.\n")
   (printf "Use 'mente' ou 'estado' para ver o estado do seu personagem\n")
   (printf "Use 'salvar' ou 'carregar' para salvar ou restaurar um jogo\n")
-  (printf "Existe alguns outros verbos, e você pode nomear uma coisa a partir de um verbo.\n"))
+  (printf "Use 'pontos' para ver seu total de pontos até o momento\n")
+  (printf "Use 'abrir ticket' para ver os brinquedos que você já utilizou até o momento\n")
+  (printf "Use 'sair' para  encerrar a partida e receber o resultado se você ganhou os prêmios ou não")
+  (printf) "Existe alguns outros verbos, e você pode nomear uma coisa a partir de um verbo.\n")
+  
 
 ;; ============================================================
 ;; Save and load
