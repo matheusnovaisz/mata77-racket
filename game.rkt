@@ -407,7 +407,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU!\n\n\n ~a" trofeu)]
   (list
    (cons in (lambda ()
    (if (have-thing? ticket)
-    (if (rides-states barriga-cheia)
+    (if (member barriga-cheia player-state)
       (brincar ticket-montanha-russa  "O passeio foi um pouco radical demais, e você não está se sentindo bem. Algo não bateu certo... Logo depois de sair do carro, você passa mal e vomita tudo que comeu até aqui." #:penalties 50)
       (brincar ticket-montanha-russa "A montanha russa te proporcionou uma adrenalina que você nunca tinha visto antes! Você sente que nada mais pode te assustar. Ou será que não...?"))
       "Alto lá! A montanha russa é um dos brinquedos mais movimentados do parque. Você precisa apresentar o seu ticket de entrada para poder brincar.")))
