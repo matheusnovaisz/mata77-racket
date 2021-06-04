@@ -2,6 +2,7 @@
 
 (require "ascii.rkt")
 
+
 ;; ============================================================
 ;; Model:
 
@@ -46,6 +47,51 @@ Boa sorte!")
 
 (define (name->element name) (hash-ref names name #f))
 (define (element->name obj) (hash-ref elements obj #f))
+
+
+;; ============================================================
+;; Macros for constructing and registering elements:
+
+(define-syntax-rule (define-verbs all-id
+                      [id spec ...] ...)
+  (begin
+    (define-one-verb id spec ...) ...
+    (record-element! 'id id) ...
+    (define all-id (list id ...))))
+
+(define-syntax define-one-verb
+  (syntax-rules (= _)
+    [(define-one-verb id (= alias ...) desc)
+     (define id (verb (list 'id 'alias ...) desc #f))]
+    [(define-one-verb id _ (= alias ...) desc)
+     (define id (verb (list 'id 'alias ...) desc #t))]
+    [(define-one-verb id)
+     (define id (verb (list 'id) (symbol->string 'id) #f))]
+    [(define-one-verb id _)
+     (define id (verb (list 'id) (symbol->string 'id) #t))]))
+
+
+(define-syntax-rule (define-thing id 
+                      [vrb expr] ...)
+  (begin
+    (define id 
+      (thing 'id #f (list (cons vrb (lambda () expr)) ...)))
+    (record-element! 'id id)))
+
+
+(define-syntax-rule (define-place id 
+                      desc 
+                      (thng ...) 
+                      ([vrb expr] ...))
+  (begin
+    (define id (place desc
+                      (list thng ...)
+                      (list (cons vrb (lambda () expr)) ...)))
+    (record-element! 'id id)))
+
+
+(define-syntax-rule (define-everywhere id ([vrb expr] ...))
+  (define id (list (cons vrb (lambda () expr)) ...)))
 
 
 ; Define points to the player
@@ -379,121 +425,100 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU!\n\n\n ~a" trofeu)]
         (begin (set-ticket-rides! ride) (pontuar (- pontos-brinquedo number)) (printf "~a\n" msg) place)
 ))
 
-(define entrada
-  (place
-   "Você está na bilheteria do parque. Pegue o seu ticket de entrada, que dará acesso aos nossos brinquedos."
-   (list ticket)
-   (list
-    (cons north 
-          (lambda () praca))
-    (cons out
-           (lambda () (begin (verifica-pontos) (exit)))))))
-(record-element! 'entrada entrada)
 
-(define praca
-  (place
-   "Você está numa pracinha. Existe uma fonte no centro. Há uma grande movimentação de pessoas."
-   (list pessoa)
-   (list
-    (cons north (lambda () montanha-russa))
-    (cons east (lambda () mansao))
-    (cons south (lambda () entrada))
-    (cons west (lambda () lago)))))
-(record-element! 'praca praca)
+(define-place entrada 
+ "Você está na bilheteria do parque. Pegue o seu ticket de entrada, que dará acesso aos nossos brinquedos."
+ [ticket]
+ ([north praca]
+  [out (begin (verifica-pontos) (exit))]))
 
-(define montanha-russa
-  (place "Você chegou na Montanha Russa, a atração do parque"
-  (list)
-  (list
-   (cons in (lambda ()
-   (if (have-thing? ticket)
+
+(define-place praca
+  "Você está numa pracinha. Existe uma fonte no centro. Há uma grande movimentação de pessoas."
+  [pessoa]
+  ([north montanha-russa]
+   [east mansao]
+   [south entrada]
+   [west lago]))
+
+
+
+(define-place montanha-russa
+  "Você chegou na Montanha Russa, a atração do parque"
+  []
+  ([in (begin
+         (if (have-thing? ticket)
     (if (member barriga-cheia player-state)
       (brincar ticket-montanha-russa  "O passeio foi um pouco radical demais, e você não está se sentindo bem. Algo não bateu certo... Logo depois de sair do carro, você passa mal e vomita tudo que comeu até aqui." #:penalties 50)
       (brincar ticket-montanha-russa "A montanha russa te proporcionou uma adrenalina que você nunca tinha visto antes! Você sente que nada mais pode te assustar. Ou será que não...?"))
-      "Alto lá! A montanha russa é um dos brinquedos mais movimentados do parque. Você precisa apresentar o seu ticket de entrada para poder brincar.")))
-   (cons south (lambda () praca))
-   )))
-(record-element! 'montanha-russa montanha-russa)
+      "Alto lá! A montanha russa é um dos brinquedos mais movimentados do parque. Você precisa apresentar o seu ticket de entrada para poder brincar."))]
+   [south praca]))
 
-(define carrossel
-  (place "Você chegou ao Carrossel. Ele é muito bonito, com muitas luzes coloridas."
-  (list)
-  (list
-   (cons in 
-          (lambda ()
+
+(define-place carrossel
+  "Você chegou ao Carrossel. Ele é muito bonito, com muitas luzes coloridas."
+  []
+  ([in (begin
             (if (have-thing? ticket)
                 (brincar ticket-carrossel "A movimentação do carrossel te deixa tranquilo. Você se lembra do tempo quando ia para o parque quando criança. Você se sente determinado.")
                 "Você não tem o ticket para entrar no brinquedo. Como você entrou no parque sem um ticket? Temos aqui um invasor?"
-                )))
-   (cons east (lambda () lago))
-   )))
-(record-element! 'carrossel carrossel)
+                ))]
+   [east lago]))
 
-(define lago
-  (place "Você se depara com um pequeno lago. Na sua beirada, há um barco."
-  (list)
-  (list
-   (cons in (lambda () barco))
-   (cons north (lambda () roda-gigante))
-   (cons east (lambda () praca))
-   (cons south (lambda () barracas))
-   (cons west (lambda () carrossel)))))
-(record-element! 'lago lago)
 
-(define barco
-  (place "Você está dentro de um barquinho"
-  (list caixa)
-  (list
-    (cons out (lambda () lago)))))
-(record-element! 'barco barco)
+(define-place lago
+  "Você se depara com um pequeno lago. Na sua beirada, há um barco."
+  []
+  ([in barco]
+   [north roda-gigante]
+   [east praca]
+   [south barracas]
+   [west carrossel]))
 
-(define roda-gigante
-  (place "Você está em frente à Roda Gigante e... UAU! Ela é realmente GIGANTE. Com certeza te dará uma boa visão do parque."
-  (list)
-  (list
-   (cons in (lambda () 
-      (if (have-thing? ticket)
+
+(define-place barco
+  "Você está dentro de um barquinho"
+  [caixa]
+  ([out lago]))
+
+
+(define-place roda-gigante
+  "Você está em frente à Roda Gigante e... UAU! Ela é realmente GIGANTE. Com certeza te dará uma boa visão do parque."
+  []
+  ([in (begin
+         (if (have-thing? ticket)
         (brincar ticket-roda-gigante "Você entra na roda-gigante bastante empolgado com a vista que te espera lá de cima." #:place topo-roda-gigante)
-        "Para entrar num brinquedo você precisa mostrar o seu ticket. Será que você o perdeu?")))
-   (cons south (lambda () lago)))))
-(record-element! 'roda-gigante roda-gigante)
+        "Para entrar num brinquedo você precisa mostrar o seu ticket. Será que você o perdeu?"))]
+   [south lago]))
 
-(define topo-roda-gigante
-  (place "A roda gigante é muito alta e você vê as pessoas lá em baixo como formiguinhas. A visão é muito bonita, seria legal aproveitar essa vista de uma forma mais proveitosa."
-    (list)
-    (list
-     (cons out (lambda () roda-gigante))
-     (cons south (lambda () roda-gigante))
-     )))
+(define-place topo-roda-gigante
+  "A roda gigante é muito alta e você vê as pessoas lá em baixo como formiguinhas. A visão é muito bonita, seria legal aproveitar essa vista de uma forma mais proveitosa."
+  []
+  ([out roda-gigante]
+   [south roda-gigante]))
 
-(define mansao
-  (place "Você chegou na Mansão do Terror. Diz a lenda que criaturas sobrenaturais que já estavam aqui antes da fundação
+(define-place mansao
+  "Você chegou na Mansão do Terror. Diz a lenda que criaturas sobrenaturais que já estavam aqui antes da fundação
 do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder."
-  (list)
-  (list
-   (cons in (lambda ()
-      (if (have-thing? ticket)
+  []
+  ([in (begin
+        (if (have-thing? ticket)
        (begin (brincar ticket-mansao "Você toma coragem e decide enfrentar a Mansão do Terror!" #:place mansao-interior) )
-       "Para entrar num brinquedo você precisa mostrar o seu ticket. Será que você o perdeu?")))
-   (cons west (lambda () praca)))))
-(record-element! 'mansao mansao)
+       "Para entrar num brinquedo você precisa mostrar o seu ticket. Será que você o perdeu?"))]
+   [west praca]))
 
-(define mansao-interior
-  (place 
-    "Você está dentro da Mansão do Terror. O ambiente é bem escuro, e você percebe alguns ruídos."
-  (list presenca)
-  (list 
-    (cons out (lambda () mansao))
-  )))
-(record-element! 'mansao-interior mansao-interior)
 
-(define barracas
-  (place "Seguindo o aroma, você chegou nas barraquinhas de comida."
-  (list)
-  (list
-   (cons buy (lambda () (and (take-thing! comida) "Você comprou comida.")))
-   (cons north (lambda () lago)))))
-(record-element! 'barracas barracas)
+(define-place mansao-interior
+  "Você está dentro da Mansão do Terror. O ambiente é bem escuro, e você percebe alguns ruídos."
+  [presenca]
+  ([out mansao]))
+  
+(define-place barracas
+  "Seguindo o aroma, você chegou nas barraquinhas de comida."
+  []
+  ([buy (begin (and (take-thing! comida) "Você comprou comida."))]
+   [north lago]))
+
 
 ;; ============================================================
 ;; Game state
