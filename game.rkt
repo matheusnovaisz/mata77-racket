@@ -138,83 +138,35 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU!\n\n\n ~a" trofeu)]
 ;; a printed form, and a boolean indincating whether it
 ;; is transitive.
 
-(define north (verb (list 'north 'n 'norte) "ir ao norte" #f))
-(record-element! 'north north)
 
-(define south (verb (list 'south 's 'sul) "ir ao sul" #f))
-(record-element! 'south south)
+(define-verbs all-verbs
+  [north (= n norte) "ir ao norte"]
+  [south (= s sul) "ir ao sul"]
+  [east (= e leste) "ir ao leste"]
+  [west (= w oeste) "ir ao oeste"]
+  [in (= enter entrar) "entrar"]
+  [out (= leave sair) "sair"]
+  [get _ (= grab take pegar) "pegar"]
+  [put _ (= drop leave largar soltar) "soltar"]
+  [open _ (= unlock abrir) "abrir"]
+  [close _ (= lock fechar) "fechar"]
+  [quit (= exit sair desistir encerrar) "desistir"]
+  [look (= show olhar) "olhar"]
+  [inventory (= mochila) "mostrar objetos da mochila"]
+  [mind (= mente estado) "demonstrar estado do personagem"]
+  [buy (= comprar) "comprar"]
+  [eat (= comer) "comer"]
+  [usar _ (=) "usar artefato"]
+  [acender _ (= acionar ligar) "acender"]
+  [pontos (= pontuacao) "ver pontos"]
+  [talk _ (= chamar falar conversar interagir invocar) "falar"]
+  [save]
+  [load]
+  [ajuda]
+  
+  )
 
-(define east (verb (list 'east 'e 'leste) "ir ao leste" #f))
-(record-element! 'east east)
 
-(define west (verb (list 'west 'w 'oeste) "ir ao oeste" #f))
-(record-element! 'west west)
-
-(define up (verb (list 'up 'cima) "ir para cima" #f))
-(record-element! 'up up)
-
-(define down (verb (list 'down 'abaixo) "ir para baixo" #f))
-(record-element! 'down down)
-
-(define in (verb (list 'in 'enter 'entrar) "entrar" #f))
-(record-element! 'in in)
-
-(define out (verb (list 'out 'leave 'sair) "sair" #f))
-(record-element! 'out out)
-
-(define get (verb (list 'get 'grab 'take 'pegar) "pegar" #t))
-(record-element! 'get get)
-
-(define put (verb (list 'put 'drop 'leave 'largar 'soltar) "soltar" #t))
-(record-element! 'put put)
-
-(define open (verb (list 'open 'unlock 'abrir) "abrir" #t))
-(record-element! 'open open)
-
-(define close (verb (list 'close 'lock 'fechar) "fechar" #t))
-(record-element! 'close close)
-
-(define knock (verb (list 'knock 'bater) (symbol->string 'knock) #t))
-(record-element! 'knock knock)
-
-(define quit (verb (list 'quit 'exit 'sair 'desistir) "desistir" #f))
-(record-element! 'quit quit) 
-
-(define look (verb (list 'look 'show 'olhar) "olhar" #f))
-(record-element! 'look look)
-
-(define inventory (verb (list 'inventory 'mochila) "mostrar objetos da mochila" #f))
-(record-element! 'inventory inventory)
-
-(define mind (verb (list 'mind 'mente 'estado) "demonstrar o estado do seu personagem" #f))
-(record-element! 'mind mind)
-
-(define help (verb (list 'help 'ajuda) (symbol->string 'help) #f))
-(record-element! 'help help)
-
-(define save (verb (list 'save 'salvar) (symbol->string 'save) #f))
-(record-element! 'save save)
-
-(define load (verb (list 'load 'carregar) (symbol->string 'load) #f))
-(record-element! 'load load)
-
-(define buy (verb (list 'buy 'comprar) "comprar" #f))
-(record-element! 'buy buy)
-
-(define eat (verb (list 'eat 'comer) "comer" #t))
-(record-element! 'eat eat)
-
-(define usar (verb (list 'usar 'utilizar 'aplicar) "usar artefato" #t))
-(record-element! 'usar usar)
-
-(define acender (verb (list 'acender 'acionar 'ligar) "acender" #t))
-(record-element! 'acender acender)
-
-(define pontos (verb (list 'pontos 'pontuacao) "ver pontos" #f))
-(record-element! 'pontos pontos)
-
-(define talk (verb (list 'talk 'falar 'conversar 'interagir 'chamar 'invocar) "falar" #t))
-(record-element! 'talk talk)
 
 
 #|
@@ -228,7 +180,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU!\n\n\n ~a" trofeu)]
 
 ;; Added by Manoel Mendonca 25/03/2021
 ;; ame result as before, but much safer
-(define all-verbs (filter verb? (hash-keys elements)))
+;(define all-the-verbs (filter verb? (hash-keys elements)))
 
 
 ;; Global actions ----------------------------------------
@@ -242,7 +194,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU!\n\n\n ~a" trofeu)]
    (cons mind (lambda () (show-states)))
    (cons save (lambda () (save-game)))
    (cons load (lambda () (load-game)))
-   (cons help (lambda () (show-help)))
+   (cons ajuda (lambda () (show-help)))
    (cons pontos (lambda () (mostrar-pontos)))))
 
 ;; Things ----------------------------------------
@@ -710,8 +662,8 @@ do parque escolheram este lugar como a sua casa. Entre se quiser, saia se puder.
   (printf "Use 'salvar' ou 'carregar' para salvar ou restaurar um jogo\n")
   (printf "Use 'pontos' para ver seu total de pontos até o momento\n")
   (printf "Use 'abrir ticket' para ver os brinquedos que você já utilizou até o momento\n")
-  (printf "Use 'sair' para  encerrar a partida e receber o resultado se você ganhou os prêmios ou não")
-  (printf) "Existe alguns outros verbos, e você pode nomear uma coisa a partir de um verbo.\n")
+  (printf "Use 'sair' para  encerrar a partida e receber o resultado se você ganhou os prêmios ou não\n")
+  (printf "Existe alguns outros verbos, e você pode nomear uma coisa a partir de um verbo.\n"))
   
 
 ;; ============================================================
