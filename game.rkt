@@ -155,7 +155,7 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU!\n\n\n ~a" trofeu)]
   [inventory (= mochila) "mostrar objetos da mochila"]
   [mind (= mente estado) "demonstrar estado do personagem"]
   [buy (= comprar) "comprar"]
-  [eat (= comer) "comer"]
+  [eat _ (= comer) "comer"]
   [usar _ (=) "usar artefato"]
   [acender _ (= acionar ligar) "acender"]
   [pontos (= pontuacao) "ver pontos"]
@@ -201,157 +201,103 @@ MAS OLHA SÓ, VOCÊ AINDA VAI LEVAR PARA CASA ESTE TROFÉU!\n\n\n ~a" trofeu)]
 ;; Each thing handles a set of transitive verbs.
 
 
-(define ticket
-  (thing 'ticket
-         #f
-         (list
-          (cons get 
-                (lambda ()
-                  (if (have-thing? ticket)
+(define-thing ticket
+  [get (if (have-thing? ticket)
                       "Voce ja esta com o ticket."
                       (begin
                         (take-thing! ticket)
-                        "Voce pegou o ticket."))))
-          (cons open
-            (lambda ()
-              (printf "Você brincou")
+                        "Voce pegou o ticket."))]
+  [open (begin
+          (printf "Você brincou")
               (if (null? rides-states)
               (printf " em nada ainda.")
               (for-each (lambda (ride) ; aplica esta função a cada coisa da lista
                   (printf "\n -> ~a." (ride-desc ride)))
                 rides-states))
-                (printf "\n")))
-          (cons put 
-                (lambda ()
-                  (if (have-thing? ticket)
+                (printf "\n"))]
+  [put (if (have-thing? ticket)
                       (begin
                         (drop-thing! ticket)
                         "Voce soltou o ticket.")
-                      "Voce nao esta com o ticket."))))))
-(record-element! 'ticket ticket)
+                      "Voce nao esta com o ticket.")])
 
 
-(define lanterna
-  (thing 'lanterna
-         #f 
-         (list
-          (cons get 
-                (lambda ()
-                  (if (have-thing? lanterna)
-                      "Voce ja esta com a lanterna."
-                      (begin
-                        (take-thing! lanterna)
-                        "Voce pegou a lanterna. Ela agora está em sua mochila."))))
-          (cons put 
-                (lambda ()
-                  (if (have-thing? lanterna)
-                      (begin
-                        (drop-thing! lanterna)
-                        "Voce soltou a lanterna.")
-                      "Voce nao esta com a lanterna.")))
-          (cons usar
-                (lambda ()
-                  (begin
-                  (if (have-thing? lanterna)
-                      (if (eq? current-place mansao-interior)
-                       (begin (use-thing lanterna "Agora que a lanterna está acesa você consegue ver algumas coisas dentro da mansão.")
-                              (pontuar pontos-bonus))
-                       "A lanterna está acesa.")
-                      "Voce nao esta com a lanterna")
-                  )))
-          (cons acender
-                (lambda ()
-                  (begin
-                  (if (have-thing? lanterna)
-                      (if (eq? current-place mansao-interior)
-                       (begin (use-thing lanterna "Agora que a lanterna está acesa você consegue ver algumas coisas dentro da mansão.")
-                              (pontuar pontos-bonus))
-                       "A lanterna está acesa.")
-                      "Voce nao esta com a lanterna")
-                  )))
-          )))
-(record-element! 'lanterna lanterna)
 
-(define binoculos
-  (thing 'binoculos
-         #f
-         (list
-          (cons get 
-                (lambda ()
-                  (if (have-thing? binoculos)
+(define-thing lanterna
+  [get (if (have-thing? lanterna)
+           "Voce ja esta com a lanterna."
+           (begin
+             (take-thing! lanterna)
+             "Voce pegou a lanterna. Ela agora está em sua mochila."))]
+  [put (if (have-thing? lanterna)
+           (begin
+             (drop-thing! lanterna)
+             "Voce soltou a lanterna.")
+           "Voce nao esta com a lanterna.")]
+  [usar  (begin
+           (if (have-thing? lanterna)
+               (if (eq? current-place mansao-interior)
+                   (begin (use-thing lanterna "Agora que a lanterna está acesa você consegue ver algumas coisas dentro da mansão.")
+                          (pontuar pontos-bonus))
+                   "A lanterna está acesa.")
+               "Voce nao esta com a lanterna")
+           )]
+  [acender (begin
+             (if (have-thing? lanterna)
+                 (if (eq? current-place mansao-interior)
+                     (begin (use-thing lanterna "Agora que a lanterna está acesa você consegue ver algumas coisas dentro da mansão.")
+                            (pontuar pontos-bonus))
+                     "A lanterna está acesa.")
+                 "Voce nao esta com a lanterna")
+             )])
+  
+
+(define-thing binoculos
+  [get (if (have-thing? binoculos)
                       "Voce ja esta com o binoculos."
                       (begin
                         (take-thing! binoculos)
-                        "Voce pegou o binoculos. Ele agora está em sua mochila."))))
-          (cons put 
-                (lambda ()
-                  (if (have-thing? binoculos)
+                        "Voce pegou o binoculos. Ele agora está em sua mochila."))]
+  [put (if (have-thing? binoculos)
                       (begin
                         (drop-thing! binoculos)
                         "Voce soltou o binoculos.")
-                      "Voce nao esta com o binoculos.")))
-          (cons usar
-                (lambda ()
-                  (begin
+                      "Voce nao esta com o binoculos.")]
+  [usar (begin
                   (if (have-thing? binoculos)
                     (if (eq? current-place topo-roda-gigante)
                       (begin (pontuar pontos-bonus) "Que incrível! Está tudo tão perto agora, você consegue ver todos os detalhes... Usando o binóculos você contempla totalmente a vista do parque, se estendendo pelo vale onde ele se encontra." )
                       (use-thing binoculos "Que incrível! Está tudo tão perto agora, você consegue ver todos os detalhes... "))
                       "Voce nao esta com o binoculos")
-          ))))
-          ))
-(record-element! 'binoculos binoculos)
+          )])
 
-(define comida
-  (thing 'comida
-         #f
-         (list
-          (cons eat
-                (lambda ()
-                  (if (have-thing? comida)
+(define-thing comida
+  [eat (if (have-thing? comida)
                       (and (set-player-state! barriga-cheia) (consume-thing! comida) "Você se sente revigorado e pronto para explorar o parque. Só tome cuidado para não passar mal em certos brinquedos...")
-                      "Voce nao tem nada para comer.")))
-          )))
-(record-element! 'comida comida)
+                      "Voce nao tem nada para comer.")])
 
-(define pessoa
-  (thing 'pessoa
-    #f
-    (list
-      (cons talk
-        (lambda ()
-          (if (thing-state pessoa)
+(define-thing pessoa
+  [talk (if (thing-state pessoa)
             "Olá de novo, amigo. Espero que esteja se divertindo."
               (begin 
                 (take-thing! binoculos) 
                 (set-thing-state! pessoa #t) 
                 (printf "Olá, amigo. Esse parque proporciona uma visão sensacional. É tão boa que quero que todos saibam como é bonito.\n")
-                "Então por favor, aceite esse binóculos como presente para você aproveitar ao máximo.")))))))
-(record-element! 'pessoa pessoa)
+                "Então por favor, aceite esse binóculos como presente para você aproveitar ao máximo."))])
 
-(define caixa
-  (thing 'caixa
-    #f
-    (list
-     (cons open
-      (lambda ()
-        (if (have-thing? lanterna)
+
+(define-thing caixa
+  [open (if (have-thing? lanterna)
           "Não há nada aqui."
-          (begin (take-thing! lanterna) "Você encontrou uma lanterna!")))))))
-(record-element! 'caixa caixa)
+          (begin (take-thing! lanterna) "Você encontrou uma lanterna!"))])
 
-(define presenca
-  (thing 'presenca
-  #f
-  (list
-  (cons talk
-    (lambda ()
-    (if (thing-state lanterna)
+(define-thing presenca
+  [talk (if (thing-state lanterna)
       (if (thing-state presenca)
       (begin (set-player-state! amedrontado) fofao)
       (begin (set-thing-state! presenca #t) "Por estar com a lanterna acesa, você percebe que a presenca na sala nada mais é que um boneco do fofão mofado. Apesar da sua face bizarra, você se sente mais tranquilo.")
       )
-      (begin (set-player-state! amedrontado) "...")))))))
+      (begin (set-player-state! amedrontado) "..."))])
 
 ;; States ----------------------------------------
 ;; Each state changes how the player will react.
